@@ -6,7 +6,7 @@ class Cameo(object): # Clase principal de la aplicación Cameo
     def __init__(self): # Inicializador de la clase Cameo
         self._windowManager = WindowManager('Cameo', self.onKeypress) # Ventana principal
         self._captureManager = CaptureManager(cv2.VideoCapture(0), self._windowManager, True) # Captura de video
-        self._activeFilter = 'portra'  # Filtro inicial
+        self._activeFilter = None  # Sin filtro inicial
 
         # Diccionario de filtros disponibles
         self._filterMap = {
@@ -34,12 +34,12 @@ class Cameo(object): # Clase principal de la aplicación Cameo
             filters.strokeEdges(frame, frame) 
 
             # Aplicar el filtro activo
-            filterObj = self._filterMap.get(self._activeFilter)
-            if callable(filterObj):  # Si es función como recolorRC es decir, que se puede llamar directamente
-                filterObj(frame, frame)
-            else:  # Si es clase con método apply, es decir, que necesita instanciarse
-                filterObj.apply(frame, frame)
-
+            if self._activeFilter:
+                filterObj = self._filterMap.get(self._activeFilter)
+                if callable(filterObj):  # Si es función como recolorRC es decir, que se puede llamar directamente
+                    filterObj(frame, frame)
+                else:  # Si es clase con método apply, es decir, que necesita instanciarse
+                    filterObj.apply(frame, frame)
 
             self._captureManager.exitFrame() # Procesar el frame capturado
             self._windowManager.processEvents() # Procesar eventos de la ventana
@@ -82,8 +82,16 @@ class Cameo(object): # Clase principal de la aplicación Cameo
             self._activeFilter = 'rgv'
         elif keycode == ord('q'):
             self._activeFilter = 'cmv'
+        else:
+            self._activeFilter = None  # Si se presiona otra tecla, desactivar el filtro
+        
 
-        print(f"Filtro activo: {self._activeFilter}") # Imprimir el filtro activo en la consola
+        
+        if self._activeFilter is None:
+            print("Sin filtro activo")
+        else:
+            print(f"Filtro activo: {self._activeFilter}")
+
 
 # Punto de entrada del programa
 if __name__ == "__main__":
